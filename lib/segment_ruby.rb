@@ -63,7 +63,7 @@ module SegmentRuby
       @max_word_length = max_word_length
 
       # unigram log probabilities
-      @ulp = ProbabilityDistribution.new(total_file_name(''), freq_file_name(''))
+      @ulp = ProbabilityDistribution.new(total_file_name, freq_file_name)
 
       # bigram log probabilities
       btf = total_file_name('2_')
@@ -83,12 +83,16 @@ module SegmentRuby
       blp and blp.has_key?(key) ? blp.log_prob(key) : ulp.log_prob(w)
     end
 
-    def total_file_name(prefix)
-      File.join(__dir__, "..", "data", "segment_ruby", model, prefix + 'total.tsv')
+    def total_file_name(prefix='')
+      File.join(model_path, prefix + 'total.tsv')
     end
 
-    def freq_file_name(prefix)
-      File.join(__dir__, "..", "data", "segment_ruby", model, prefix + 'frequencies.tsv')
+    def freq_file_name(prefix='')
+      File.join(model_path, prefix + 'frequencies.tsv')
+    end
+
+    def model_path
+      File.join(__dir__, "..", "data", "segment_ruby", model)
     end
 
     # Returns all the splits of a string up to a given length
