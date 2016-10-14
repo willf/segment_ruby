@@ -32,32 +32,26 @@ module SegmentRuby
       true
     end
 
-    def table
-      @table
-    end
+    attr_reader :log_total, :table
 
     def files
       [@total_file_name, @data_file_name]
     end
 
     def log_prob(w)
-      @table[w]
+      table[w]
     end
 
     def prob(w)
-      2**@table[w]
-    end
-
-    def log_total
-      @log_total
+      2**table[w]
     end
 
     def total
-      2**@log_total
+      2**log_total
     end
 
     def has_key?(w)
-      @table.has_key?(w)
+      table.has_key?(w)
     end
   end
 
@@ -75,42 +69,28 @@ module SegmentRuby
       true
     end
 
-    def model
-      @model
-    end
-
-    def max_word_length
-      @max_word_length
-    end
-
-    def ulp
-      @ulp
-    end
-
-    def blp
-      @blp
-    end
+    attr_reader :blp, :max_word_length, :model, :ulp
 
     def log_Pr(w)
-      @ulp.log_prob(w)
+      ulp.log_prob(w)
     end
 
     def log_CPr(w, prev)
       key = [prev, w].join(' ')
-      (@blp and @blp.has_key?(key)) ? @blp.log_prob(key) : @ulp.log_prob(w)
+      (blp and blp.has_key?(key)) ? blp.log_prob(key) : ulp.log_prob(w)
     end
 
     def total_file_name(prefix)
-      File.join(__dir__, "..", "data", "segment_ruby", @model, prefix + 'total.tsv')
+      File.join(__dir__, "..", "data", "segment_ruby", model, prefix + 'total.tsv')
     end
 
     def freq_file_name(prefix)
-      File.join(__dir__, "..", "data", "segment_ruby", @model, prefix + 'frequencies.tsv')
+      File.join(__dir__, "..", "data", "segment_ruby", model, prefix + 'frequencies.tsv')
     end
 
     # Returns all the splits of a string up to a given length
     def splits(text)
-      (0..[@max_word_length,text.size-1].min).map{|i| [text[0..i], text[i+1..text.size]  ] }
+      (0..[max_word_length,text.size-1].min).map{|i| [text[0..i], text[i+1..text.size]  ] }
     end
 
     def combine(pFirst, first, segmented)
