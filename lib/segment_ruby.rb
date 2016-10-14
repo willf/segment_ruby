@@ -117,7 +117,7 @@ module SegmentRuby
     end
 
     def segment(text, prev='<S>')
-      p, segmentation = segment_r(text, prev, 0, Hash.new)
+      _, segmentation = segment_r(text, prev, 0, Hash.new)
 
       segmentation
     end
