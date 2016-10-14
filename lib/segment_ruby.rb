@@ -58,8 +58,8 @@ module SegmentRuby
   end
 
   class Analyzer
-    def initialize(model='small', max_word_length=20)
-      @model = model
+    def initialize(model_name=:small, max_word_length=20)
+      @model_name = model_name
       @max_word_length = max_word_length
 
       # unigram log probabilities
@@ -71,7 +71,7 @@ module SegmentRuby
       @blp = (File.exists?(btf) and File.exists?(bff) ? ProbabilityDistribution.new(btf, bff) : false)
     end
 
-    attr_reader :blp, :max_word_length, :model, :ulp
+    attr_reader :blp, :max_word_length, :model_name, :ulp
 
     def log_Pr(w)
       ulp.log_prob(w)
@@ -92,7 +92,7 @@ module SegmentRuby
     end
 
     def model_path
-      File.join(__dir__, "..", "data", "segment_ruby", model)
+      @model_path ||= File.join(__dir__, "..", "data", "segment_ruby", model_name.to_s)
     end
 
     # Returns all the splits of a string up to a given length

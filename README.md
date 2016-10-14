@@ -23,17 +23,17 @@ Or install it yourself as:
 
 ```
 require 'segment_ruby'
-t = SegmentRuby::Analyzer.new('twitter'); true
+t = SegmentRuby::Analyzer.new(:twitter)
 t.segment("theboywholived")
 => ["the", "boy", "who", "lived"]
 ```
 Models include:
 
-- `norvig`: based on Google web data
-- `google_books`: based on Google books data
-- `anchor`: based on Web anchor text
-- `twitter`: based on Twitter data
-- `small`: smaller version of the Google books data
+- `:norvig`: based on Google web data
+- `:google_books`: based on Google books data
+- `:anchor`: based on Web anchor text
+- `:twitter`: based on Twitter data
+- `:small`: smaller version of the Google books data
 
 The default model is `small`. Use it if is seems to work for you.
 
