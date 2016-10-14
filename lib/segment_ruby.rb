@@ -14,11 +14,11 @@ module SegmentRuby
       @total_file_name = total_file_name
       @data_file_name = total_file_name
 
-      begin
+      @log_total = begin
         total = File.read(total_file_name).to_i
-        @log_total = Math.log2(total)
+        Math.log2(total)
       rescue
-        @log_total = Math.log2(10**1000)
+        Math.log2(10**1000)
       end
 
       @table = Hash.new { |w| -Float::INFINITY }
@@ -28,9 +28,9 @@ module SegmentRuby
         freq = data[-1].to_i
         keys = data[0..-2]
         key = keys.join(' ')
-        log_p = Math.log2(freq) - @log_total
+        log_p = Math.log2(freq) - log_total
 
-        @table[key] = log_p
+        table[key] = log_p
       end
     end
 
