@@ -5,10 +5,6 @@ describe SegmentRuby do
     expect(SegmentRuby::VERSION).not_to be nil
   end
 
-  it "has a simple public interface" do
-    expect(SegmentRuby.call("jonmagic", model_name: :twitter)).to eq(["jon", "magic"])
-  end
-
   it "initializes defaults correctly" do
     a = SegmentRuby::Analyzer.new
     expect(a.model_name).to eq(:small)
