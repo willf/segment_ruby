@@ -32,8 +32,6 @@ module SegmentRuby
 
         @table[key] = log_p
       end
-
-      true
     end
 
     attr_reader :log_total, :table
@@ -71,8 +69,6 @@ module SegmentRuby
       btf = total_file_name('2_')
       bff = freq_file_name('2_')
       @blp = (File.exists?(btf) and File.exists?(bff) ? ProbabilityDistribution.new(btf, bff) : false)
-
-      true
     end
 
     attr_reader :blp, :max_word_length, :model, :ulp
