@@ -1,4 +1,4 @@
-require "segment_ruby/version"
+require_relative "./segment_ruby/version"
 require 'pathname'
 
 # Based on "Natural Language Corpus Data"
