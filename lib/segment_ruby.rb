@@ -7,6 +7,25 @@ require 'pathname'
 
 module SegmentRuby
 
+  # Public: Takes a string and segments it into an array of string parts. Caches
+  # each analyzer that is created by it's model_name so that using a model again
+  # is faster.
+  #
+  # string - String to segment
+  # model_name: Symbol name of model. Default is :small.
+  #
+  # Returns an Array.
+  def self.call(string, model_name: :small)
+    @prepared_models ||= Hash.new(false)
+    if prepared_model = @prepared_models[model_name]
+      prepared_model.segment(string)
+    else
+      @prepared_models[model_name] = Analyzer.new(model_name)
+      call(string, model_name: model_name)
+    end
+  end
+
+
   LOG_1 = Math.log2(1)
 
   class ProbabilityDistribution

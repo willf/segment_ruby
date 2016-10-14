@@ -21,9 +21,16 @@ Or install it yourself as:
 
 ## Usage
 
-```
+```ruby
 require 'segment_ruby'
-t = SegmentRuby::Analyzer.new(:twitter)
+
+# This public interface caches each model by model_name for fast re-use.
+SegmentRuby.call("theboywholived", model_name: :twitter)
+=> ["the", "boy", "who", "lived"]
+
+# Or instantiate the Analyzer directly and call segment on it. Defaults to
+# model_name :small.
+t = SegmentRuby::Analyzer.new
 t.segment("theboywholived")
 => ["the", "boy", "who", "lived"]
 ```
