@@ -34,6 +34,7 @@ Models include:
 - `:anchor`: based on Web anchor text
 - `:twitter`: based on Twitter data
 - `:small`: smaller version of the Google books data
+- `:us_names`: US names, based on SSI data
 
 The default model is `small`. Use it if is seems to work for you.
 
