@@ -53,4 +53,10 @@ describe SegmentRuby do
     expect(a.segment("theboywholived")).to eq(["the", "boy", "who", "lived"])
   end
 
+  it "segements US names like a boss" do
+    a = SegmentRuby::Analyzer.new(:us_names)
+    expect(a.segment("abelincoln")).to eq(["abe", "lincoln"])
+    expect(a.segment("susanbanthony")).to eq(["susan", "b", "anthony"])
+  end
+
 end
