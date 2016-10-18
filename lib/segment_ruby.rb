@@ -68,7 +68,7 @@ module SegmentRuby
       # bigram log probabilities
       btf = total_file_name('2_')
       bff = freq_file_name('2_')
-      @blp = (File.exists?(btf) and File.exists?(bff) ? ProbabilityDistribution.new(btf, bff) : false)
+      @blp = (File.exists?(btf) && File.exists?(bff) ? ProbabilityDistribution.new(btf, bff) : false)
     end
 
     attr_reader :blp, :max_word_length, :model_name, :ulp
@@ -80,7 +80,7 @@ module SegmentRuby
     def log_CPr(w, prev)
       key = [prev, w].join(' ')
 
-      blp and blp.has_key?(key) ? blp.log_prob(key) : ulp.log_prob(w)
+      blp && blp.has_key?(key) ? blp.log_prob(key) : ulp.log_prob(w)
     end
 
     def total_file_name(prefix='')
@@ -107,7 +107,7 @@ module SegmentRuby
     end
 
     def segment_r(text, prev, n, memo)
-      return [0.0, []] if not text or (text.size == 0)
+      return [0.0, []] if (!text) || (text.size == 0)
       return memo[text] if memo.has_key?(text)
 
       log_p_segment = splits(text).map do |first, rem|

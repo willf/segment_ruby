@@ -33,6 +33,16 @@ describe SegmentRuby do
     expect(a.log_CPr("dog", "the")).to be > a.log_CPr("dog", "a")
   end
 
+  it "in the presence of no bigram data, still returns conditional probabilities" do
+    a = SegmentRuby::Analyzer.new(:test_unigram)
+    expect(a.log_CPr("the", "or")).to eq(a.log_Pr("the"))
+  end
+
+  it "in the presence of no bigram data, still returns segmentations" do
+    a = SegmentRuby::Analyzer.new(:test_unigram)
+    expect(a.segment("ofthe")).to eq(["of", "the"])
+  end
+
   it "splits like a boss" do
     a = SegmentRuby::Analyzer.new
     expect(a.splits("abc")).to eq([["a", "bc"], ["ab", "c"], ["abc", ""]])
