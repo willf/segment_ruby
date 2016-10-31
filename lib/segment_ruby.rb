@@ -11,9 +11,6 @@ module SegmentRuby
 
   class ProbabilityDistribution
     def initialize(total_file_name, data_file_name)
-      @total_file_name = total_file_name
-      @data_file_name = total_file_name
-
       @log_total = begin
         total = File.read(total_file_name).to_i
         Math.log2(total)
@@ -35,10 +32,6 @@ module SegmentRuby
     end
 
     attr_reader :log_total, :table
-
-    def files
-      [@total_file_name, @data_file_name]
-    end
 
     def log_prob(w)
       table[w]
