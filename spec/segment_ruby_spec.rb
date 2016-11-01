@@ -7,35 +7,35 @@ describe SegmentRuby do
 
   it "initializes defaults correctly" do
     a = SegmentRuby::Analyzer.new
-    expect(a.model_name).to eq(:small)
+    expect(a.corpus_name).to eq(:small)
     expect(a.max_word_length).to eq(20)
-    path, filename = File.split(a.total_file_name('2_'))
+    path, filename = File.split(a.total_filename('2_'))
     expect(path).to end_with("small")
     expect(filename).to eq("2_total.tsv")
-    path, filename = File.split(a.freq_file_name('2_'))
+    path, filename = File.split(a.frequency_filename('2_'))
     expect(path).to end_with("small")
     expect(filename).to eq("2_frequencies.tsv")
   end
 
   it "initializes non-defaults correctly" do
     a = SegmentRuby::Analyzer.new(:twitter, 10)
-    expect(a.model_name).to eq(:twitter)
+    expect(a.corpus_name).to eq(:twitter)
     expect(a.max_word_length).to eq(10)
   end
 
   it "loads small data correctly" do
     a = SegmentRuby::Analyzer.new
-    expect(a.log_Pr("the")).to be > a.log_Pr("The")
+    expect(a.log_probability("the")).to be > a.log_probability("The")
   end
 
   it "loads bigram small data correctly" do
     a = SegmentRuby::Analyzer.new
-    expect(a.log_CPr("dog", "the")).to be > a.log_CPr("dog", "a")
+    expect(a.conditional_log_probability("dog", "the")).to be > a.conditional_log_probability("dog", "a")
   end
 
   it "in the presence of no bigram data, still returns conditional probabilities" do
     a = SegmentRuby::Analyzer.new(:test_unigram)
-    expect(a.log_CPr("the", "or")).to eq(a.log_Pr("the"))
+    expect(a.conditional_log_probability("the", "or")).to eq(a.log_probability("the"))
   end
 
   it "in the presence of no bigram data, still returns segmentations" do
