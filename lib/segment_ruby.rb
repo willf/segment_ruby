@@ -7,8 +7,6 @@ require 'pathname'
 
 module SegmentRuby
 
-  LOG_1 = Math.log2(1)
-
   class ProbabilityDistribution
     def initialize(total_filename, data_file_name)
       @total = File.read(total_filename).to_i rescue 10**1000
