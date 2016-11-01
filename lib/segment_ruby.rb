@@ -11,12 +11,8 @@ module SegmentRuby
 
   class ProbabilityDistribution
     def initialize(total_filename, data_file_name)
-      @log_total = begin
-        total = File.read(total_filename).to_i
-        Math.log2(total)
-      rescue
-        Math.log2(10**1000)
-      end
+      @total = File.read(total_filename).to_i rescue 10**1000
+      @log_total = Math.log2(total)
       @log_probabilities_by_phrase = Hash.new { |w| -Float::INFINITY }
 
       File.open(data_file_name).each_line do |line|
@@ -30,7 +26,9 @@ module SegmentRuby
       end
     end
 
-    attr_reader :log_total, :log_probabilities_by_phrase
+    attr_reader :total
+    attr_reader :log_total
+    attr_reader :log_probabilities_by_phrase
 
     def log_probability(phrase)
       log_probabilities_by_phrase[phrase]
@@ -38,10 +36,6 @@ module SegmentRuby
 
     def probability(phrase)
       2**log_probabilities_by_phrase[phrase]
-    end
-
-    def total
-      2**log_total
     end
 
     def has_phrase?(phrase)
