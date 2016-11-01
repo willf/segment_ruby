@@ -88,7 +88,18 @@ module SegmentRuby
       @corpus_path ||= File.join(__dir__, "..", "data", "segment_ruby", corpus_name.to_s)
     end
 
-    # Returns all the splits of a string up to a given length
+    # Returns all the splits of a string up to a given length. Example:
+    #
+    # [
+    #   ["i", "amone"],
+    #   ["ia", "mone"],
+    #   ["iam", "one"],
+    #   ["iamo", "ne"],
+    #   ["iamon", "e"],
+    #   ["iamone", ""]
+    # ]
+    #
+    # Returns an Array of arrays of text splits (head and tail).
     def splits(text)
       (0..[max_word_length, text.size-1].min).
         map { |i| [text[0..i], text[i+1..text.size]] }
