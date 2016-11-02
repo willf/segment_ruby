@@ -7,121 +7,126 @@ require 'pathname'
 
 module SegmentRuby
 
-  LOG_1 = Math.log2(1)
-
   class ProbabilityDistribution
-    def initialize(total_file_name, data_file_name)
-      @total_file_name = total_file_name
-      @data_file_name = total_file_name
-
-      @log_total = begin
-        total = File.read(total_file_name).to_i
-        Math.log2(total)
-      rescue
-        Math.log2(10**1000)
-      end
-
-      @table = Hash.new { |w| -Float::INFINITY }
+    def initialize(total_filename, data_file_name)
+      @total = File.read(total_filename).to_i rescue 10**1000
+      @log_total = Math.log2(total)
+      @log_probabilities_by_phrase = Hash.new { |w| -Float::INFINITY }
 
       File.open(data_file_name).each_line do |line|
-        data = line.split(/\s/)
-        freq = data[-1].to_i
-        keys = data[0..-2]
-        key = keys.join(' ')
-        log_p = Math.log2(freq) - log_total
+        words_in_phrase_and_frequency = line.split(/\s/)
+        frequency = words_in_phrase_and_frequency[-1].to_i
+        words_in_phrase = words_in_phrase_and_frequency[0..-2]
+        phrase = words_in_phrase.join(' ')
+        log_probability = Math.log2(frequency) - log_total
 
-        table[key] = log_p
+        log_probabilities_by_phrase[phrase] = log_probability
       end
     end
 
-    attr_reader :log_total, :table
+    attr_reader :total
+    attr_reader :log_total
+    attr_reader :log_probabilities_by_phrase
 
-    def files
-      [@total_file_name, @data_file_name]
+    def log_probability(phrase)
+      log_probabilities_by_phrase[phrase]
     end
 
-    def log_prob(w)
-      table[w]
+    def probability(phrase)
+      2**log_probabilities_by_phrase[phrase]
     end
 
-    def prob(w)
-      2**table[w]
-    end
-
-    def total
-      2**log_total
-    end
-
-    def has_key?(w)
-      table.has_key?(w)
+    def has_phrase?(phrase)
+      log_probabilities_by_phrase.has_key?(phrase)
     end
   end
 
   class Analyzer
-    def initialize(model_name=:small, max_word_length=20)
-      @model_name = model_name
+    def initialize(corpus_name=:small, max_word_length=20)
+      @corpus_name = corpus_name
       @max_word_length = max_word_length
 
-      # unigram log probabilities
-      @ulp = ProbabilityDistribution.new(total_file_name, freq_file_name)
+      @unigram_log_probabilities =
+        ProbabilityDistribution.new(total_filename, frequency_filename)
 
-      # bigram log probabilities
-      btf = total_file_name('2_')
-      bff = freq_file_name('2_')
-      @blp = (File.exists?(btf) && File.exists?(bff) ? ProbabilityDistribution.new(btf, bff) : false)
+      @bigram_log_probabilities =
+        if (File.exists?(total_filename('2_')) && File.exists?(frequency_filename('2_')))
+          ProbabilityDistribution.new(total_filename('2_'), frequency_filename('2_'))
+        else
+          false
+        end
     end
 
-    attr_reader :blp, :max_word_length, :model_name, :ulp
+    attr_reader :corpus_name
+    attr_reader :unigram_log_probabilities
+    attr_reader :bigram_log_probabilities
+    attr_reader :max_word_length
 
-    def log_Pr(w)
-      ulp.log_prob(w)
+    def log_probability(word)
+      unigram_log_probabilities.log_probability(word)
     end
 
-    def log_CPr(w, prev)
-      key = [prev, w].join(' ')
+    def conditional_log_probability(word, previous_word)
+      phrase = [previous_word, word].join(' ')
 
-      blp && blp.has_key?(key) ? blp.log_prob(key) : ulp.log_prob(w)
+      if bigram_log_probabilities && bigram_log_probabilities.has_phrase?(phrase)
+        bigram_log_probabilities.log_probability(phrase)
+      else
+        unigram_log_probabilities.log_probability(word)
+      end
     end
 
-    def total_file_name(prefix='')
-      File.join(model_path, prefix + 'total.tsv')
+    def total_filename(prefix='')
+      File.join(corpus_path, prefix + 'total.tsv')
     end
 
-    def freq_file_name(prefix='')
-      File.join(model_path, prefix + 'frequencies.tsv')
+    def frequency_filename(prefix='')
+      File.join(corpus_path, prefix + 'frequencies.tsv')
     end
 
-    def model_path
-      @model_path ||= File.join(__dir__, "..", "data", "segment_ruby", model_name.to_s)
+    def corpus_path
+      @corpus_path ||= File.join(__dir__, "..", "data", "segment_ruby", corpus_name.to_s)
     end
 
-    # Returns all the splits of a string up to a given length
+    # Returns all the splits of a string up to a given length. Example:
+    #
+    # [
+    #   ["i", "amone"],
+    #   ["ia", "mone"],
+    #   ["iam", "one"],
+    #   ["iamo", "ne"],
+    #   ["iamon", "e"],
+    #   ["iamone", ""]
+    # ]
+    #
+    # Returns an Array of arrays of text splits (head and tail).
     def splits(text)
-      (0..[max_word_length, text.size-1].min).map { |i| [text[0..i], text[i+1..text.size]] }
+      (0..[max_word_length, text.size-1].min).
+        map { |i| [text[0..i], text[i+1..text.size]] }
     end
 
-    def combine(pFirst, first, segmented)
-      pRem,rem = segmented
+    def combine(word_log_probability, word, segmented)
+      remaining_words_log_probability, remaining_words = segmented
 
-      [pFirst+pRem, [first]+rem]
+      [word_log_probability+remaining_words_log_probability, [word]+remaining_words]
     end
 
-    def segment_r(text, prev, n, memo)
+    def recursive_segment(text, previous_word, n, recursive_segment_cache)
       return [0.0, []] if (!text) || (text.size == 0)
-      return memo[text] if memo.has_key?(text)
+      return recursive_segment_cache[text] if recursive_segment_cache.has_key?(text)
 
-      log_p_segment = splits(text).map do |first, rem|
-         log_p = log_CPr(first, prev)
-         combine(log_p, first, segment_r(rem, first, n+1, memo))
+      segment_log_probability = splits(text).map do |head, tail|
+         log_probability = conditional_log_probability(head, previous_word)
+         combine(log_probability, head, recursive_segment(tail, head, n+1, recursive_segment_cache))
       end.max
 
-      memo[text] = log_p_segment
+      recursive_segment_cache[text] = segment_log_probability
 
-      log_p_segment
+      segment_log_probability
     end
 
-    def segment(text, prev='<S>')
-      _, segmentation = segment_r(text, prev, 0, Hash.new)
+    def segment(text, previous_word='<S>')
+      _, segmentation = recursive_segment(text, previous_word, 0, Hash.new)
 
       segmentation
     end
